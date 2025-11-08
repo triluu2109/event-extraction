@@ -213,13 +213,13 @@ def process_bert(data, tokenizer, vocab):
         length = len(_inputs) - 2
 
         _word_mask1d = np.array([1] * length)
-        _word_mask2d = np.triu(np.ones((length, length), dtype=np.bool))
-        # _triu_mask2d = np.triu(np.ones((length, length), dtype=np.bool), k=1)
-        _triu_mask2d = np.ones((length, length), dtype=np.bool)
+        _word_mask2d = np.triu(np.ones((length, length), dtype=bool))
+        # _triu_mask2d = np.triu(np.ones((length, length), dtype=bool), k=1)
+        _triu_mask2d = np.ones((length, length), dtype=bool)
         np.fill_diagonal(_triu_mask2d, 0)
-        _tri_labels = np.zeros((vocab.tri_label_num, length, length), dtype=np.bool)
-        _arg_labels = np.zeros((vocab.tri_label_num, length, length), dtype=np.bool)
-        _role_labels = np.zeros((vocab.tri_label_num, length, length, vocab.rol_label_num), dtype=np.bool)
+        _tri_labels = np.zeros((vocab.tri_label_num, length, length), dtype=bool)
+        _arg_labels = np.zeros((vocab.tri_label_num, length, length), dtype=bool)
+        _role_labels = np.zeros((vocab.tri_label_num, length, length, vocab.rol_label_num), dtype=bool)
         _att_mask = np.array([1] * len(_inputs))
         if "event_type" in instance:
             pos_event = vocab.label2id(instance["event_type"], "tri")
