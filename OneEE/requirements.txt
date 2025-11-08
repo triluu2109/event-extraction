@@ -1,15 +1,13 @@
-(main) root@C.27643349:/OneEE/OneEE$ python main.py
-Traceback (most recent call last):
-  File "/OneEE/OneEE/main.py", line 260, in <module>
-    logger = utils.get_logger(config.dataset)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/OneEE/OneEE/utils.py", line 13, in get_logger
-    file_handler = logging.FileHandler(pathname)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/venv/main/lib/python3.12/logging/__init__.py", line 1231, in __init__
-    StreamHandler.__init__(self, self._open())
-                                 ^^^^^^^^^^^^
-  File "/venv/main/lib/python3.12/logging/__init__.py", line 1263, in _open
-    return open_func(self.baseFilename, self.mode,
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: '/OneEE/OneEE/log/fewFC_11-07_10-04-21.txt'
+# numpy==1.19.2
+# prettytable==2.1.0
+# scikit-learn==0.24.2
+# scipy==1.7.0
+# torch==1.9.0
+# transformers==4.10.0
+
+numpy
+prettytable
+scikit-learn
+scipy
+torch
+transformers
