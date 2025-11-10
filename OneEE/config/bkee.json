@@ -1,5 +1,5 @@
 {
-  "dataset": "bkee",
+  "dataset": "BKEE",
 
   "bert_hid_size": 768,
   "tri_hid_size": 256,
