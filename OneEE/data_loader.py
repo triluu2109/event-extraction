@@ -286,7 +286,7 @@ def fill_vocab(vocab, dataset):
 def load_data(config):
     global EVENT_NUN
     global SAMPLE_NUM
-    with open("./data/{}/new_train.json".format(config.dataset), "r", encoding="utf-8") as f:
+    with open("./data/{}/train.json".format(config.dataset), "r", encoding="utf-8") as f:
         train_data = [json.loads(x) for x in f.readlines()]
     with open("./data/{}/dev.json".format(config.dataset), "r", encoding="utf-8") as f:
         dev_data = [json.loads(x) for x in f.readlines()]
