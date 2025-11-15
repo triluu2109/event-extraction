@@ -149,24 +149,39 @@ class Trainer(object):
             # arg_logits = arg_logits[..., :-1]
             # role_logits = role_logits[..., :-1, :]
             
-            if (i + 1) % 1 == 0:
+            if (i + 1) % 16 == 0:
                 with torch.no_grad():
-                    tri_logits_flat = tri_logits[word_mask2d]
-                    arg_logits_flat = arg_logits[word_mask2d]
-                    role_logits_flat = role_logits[triu_mask2d]
+                    tri_pred = tri_logits.argmax(dim=-1)       # [B, L, L]
+                    arg_pred = arg_logits.argmax(dim=-1)       # [B, L, L]
+                    role_pred = role_logits.argmax(dim=-1)     # [B, L, L]
 
-                    tri_pos = (tri_logits_flat > 0).float().mean().item()
-                    arg_pos = (arg_logits_flat > 0).float().mean().item()
-                    role_pos = (role_logits_flat > 0).float().mean().item()
+                    tri_gold = tri_labels.argmax(dim=-1)
+                    arg_gold = arg_labels.argmax(dim=-1)
+                    role_gold = role_labels.argmax(dim=-1)
+
+                    sample_b = 0
+                    sample_words = min(5, tri_pred.size(1))
 
                     logger.info(
-                        "Epoch {} | Batch {} | loss {:.4f} | tri[min {:.4f}, max {:.4f}, mean {:.4f}, >0 {:.4f}] | "
-                        "arg[min {:.4f}, max {:.4f}, mean {:.4f}, >0 {:.4f}] | "
-                        "role[min {:.4f}, max {:.4f}, mean {:.4f}, >0 {:.4f}]".format(
-                            epoch, i + 1, loss.item(),
-                            tri_logits_flat.min().item(), tri_logits_flat.max().item(), tri_logits_flat.mean().item(), tri_pos,
-                            arg_logits_flat.min().item(), arg_logits_flat.max().item(), arg_logits_flat.mean().item(), arg_pos,
-                            role_logits_flat.min().item(), role_logits_flat.max().item(), role_logits_flat.mean().item(), role_pos
+                        "Epoch {} | Batch {} | tri_pred {} | tri_gold {}".format(
+                            epoch,
+                            i + 1,
+                            tri_pred[sample_b, :sample_words, :sample_words].tolist(),
+                            tri_gold[sample_b, :sample_words, :sample_words].tolist()
+                        )
+                    )
+
+                    logger.info(
+                        "arg_pred {} | arg_gold {}".format(
+                            arg_pred[sample_b, :sample_words, :sample_words].tolist(),
+                            arg_gold[sample_b, :sample_words, :sample_words].tolist()
+                        )
+                    )
+
+                    logger.info(
+                        "role_pred {} | role_gold {}".format(
+                            role_pred[sample_b, :sample_words, :sample_words].tolist(),
+                            role_gold[sample_b, :sample_words, :sample_words].tolist()
                         )
                     )
 
