@@ -153,8 +153,8 @@ class Trainer(object):
             
             print(tri_logits)
             print(arg_logits)
-            print(role_logits)
             
+            print(role_logits)
             
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), config.grad_clip_norm)
