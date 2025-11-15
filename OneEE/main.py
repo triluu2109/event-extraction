@@ -148,8 +148,30 @@ class Trainer(object):
             # tri_logits = tri_logits[..., :-1]
             # arg_logits = arg_logits[..., :-1]
             # role_logits = role_logits[..., :-1, :]
+            
+            if (i + 1) % config.log_interval == 0:
+                with torch.no_grad():
+                    tri_logits_flat = tri_logits[word_mask2d]
+                    arg_logits_flat = arg_logits[word_mask2d]
+                    role_logits_flat = role_logits[triu_mask2d]
 
-            loss.backward()
+                    tri_pos = (tri_logits_flat > 0).float().mean().item()
+                    arg_pos = (arg_logits_flat > 0).float().mean().item()
+                    role_pos = (role_logits_flat > 0).float().mean().item()
+
+                    logger.info(
+                        "Epoch {} | Batch {} | loss {:.4f} | tri[min {:.4f}, max {:.4f}, mean {:.4f}, >0 {:.4f}] | "
+                        "arg[min {:.4f}, max {:.4f}, mean {:.4f}, >0 {:.4f}] | "
+                        "role[min {:.4f}, max {:.4f}, mean {:.4f}, >0 {:.4f}]".format(
+                            epoch, i + 1, loss.item(),
+                            tri_logits_flat.min().item(), tri_logits_flat.max().item(), tri_logits_flat.mean().item(), tri_pos,
+                            arg_logits_flat.min().item(), arg_logits_flat.max().item(), arg_logits_flat.mean().item(), arg_pos,
+                            role_logits_flat.min().item(), role_logits_flat.max().item(), role_logits_flat.mean().item(), role_pos
+                        )
+                    )
+
+
+            loss.backward()i
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), config.grad_clip_norm)
             self.optimizer.step()
             self.optimizer.zero_grad()
