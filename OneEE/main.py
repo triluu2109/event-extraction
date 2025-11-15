@@ -149,7 +149,7 @@ class Trainer(object):
             # arg_logits = arg_logits[..., :-1]
             # role_logits = role_logits[..., :-1, :]
             
-            if (i + 1) % config.log_interval == 0:
+            if (i + 1) % 1 == 0:
                 with torch.no_grad():
                     tri_logits_flat = tri_logits[word_mask2d]
                     arg_logits_flat = arg_logits[word_mask2d]
