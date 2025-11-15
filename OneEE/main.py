@@ -152,11 +152,10 @@ class Trainer(object):
             # tri_logits = tri_logits[..., :-1]
             # arg_logits = arg_logits[..., :-1]
             # role_logits = role_logits[..., :-1, :]
+                        
+            # print(arg_logits)
             
-            print(tri_logits)
-            print(arg_logits)
-            
-            print(role_logits)
+            # print(role_logits)
             
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), config.grad_clip_norm)
@@ -226,12 +225,24 @@ class Trainer(object):
         logger.info("\n{}".format(table))
         return (ti_f1 + ai_f1 + tc_f1 + ac_f1) / 4
 
+        def inference(self, data_loader):
+                self.model.eval()
+                with torch.no_grad():
+                    for i, data_batch in enumerate(data_loader):
+                        data_batch = [data.cuda() for data in data_batch[:-2]] + [data_batch[-2], data_batch[-1]]
+                        inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, event_idx, tuple_labels, _ = data_batch
+
+                        outputs = self.model(inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels)
+                        decoded = utils.decode(outputs, tuple_labels, config.tri_args)
+                        logger.info("Inference result (first batch): {}".format(decoded))
+                        return decoded
+        
+    
     def save(self, path):
         torch.save(self.model.state_dict(), path)
 
     def load(self, path):
         self.model.load_state_dict(torch.load(path))
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -260,6 +271,7 @@ if __name__ == '__main__':
     parser.add_argument('--bert_name', type=str)
     parser.add_argument('--bert_learning_rate', type=float)
 
+    parser.add_argument('--inference', type=str)
     parser.add_argument('--seed', type=int)
 
     args = parser.parse_args()
@@ -299,13 +311,18 @@ if __name__ == '__main__':
 
     logger.info("Building Model")
     model = Model(config)
-
     model = model.cuda()
 
     trainer = Trainer(model)
 
     best_f1 = 0
     best_test_f1 = 0
+
+    if args.inference == 'inference':
+        trainer.load("model.pt")
+        trainer.inference(test_loader)
+        exit(0)
+
     for i in range(config.epochs):
         logger.info("Epoch: {}".format(i))
         trainer.train(i, train_loader)
@@ -316,6 +333,7 @@ if __name__ == '__main__':
                 best_f1 = f1
                 best_test_f1 = test_f1
                 trainer.save("model.pt")
+
     logger.info("Best DEV F1: {:3.4f}".format(best_f1))
     logger.info("Best TEST F1: {:3.4f}".format(best_test_f1))
     trainer.load("model.pt")
