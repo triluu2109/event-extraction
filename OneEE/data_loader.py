@@ -209,7 +209,7 @@ def process_bert(data, tokenizer, vocab):
     for ins_id, instance in tqdm.tqdm(enumerate(data), total=len(data)):
 
         tokens = [x for x in instance["content"].lower().split()]
-        
+
         _inputs = [tokenizer.cls_token_id] \
                  + tokenizer.convert_tokens_to_ids(tokens) \
                  + [tokenizer.sep_token_id]
@@ -217,7 +217,7 @@ def process_bert(data, tokenizer, vocab):
         print(f'\n\nID: {instance["id"]}')
         print(f'Tokens: {tokens}')
         print(f'Input: {_inputs}')
-        
+
         length = len(_inputs) - 2
 
         _word_mask1d = np.array([1] * length)
@@ -263,6 +263,7 @@ def process_bert(data, tokenizer, vocab):
         neg_event = list(total_event_set - event_set)
         # neg_probs = [vocab.tri_id2prob[x] for x in neg_event]
 
+        # keep collecting data as before
         inputs.append(_inputs)
         att_mask.append(_att_mask)
         word_mask1d.append(_word_mask1d)
@@ -274,29 +275,38 @@ def process_bert(data, tokenizer, vocab):
         gold_tuples.append(_gold_tuples)
         event_list.append((pos_event, neg_event))
 
-        # Log details for this instance using prettytable
-        tri_pos = int(_tri_labels.sum())
-        arg_pos = int(_arg_labels.sum())
-        role_pos = int(_role_labels.sum())
-        gold_total = sum(len(v) for v in _gold_tuples.values())
-        tbl = pt.PrettyTable([
-            "id", "#tokens", "att_mask_len", "tri_pos", "arg_pos", "role_pos",
-            "gold_tuples_total", "pos_event", "neg_event_count"
-        ])
-        tbl.add_row([
-            instance.get("id", ins_id),
-            len(_inputs),
-            len(_att_mask),
-            tri_pos,
-            arg_pos,
-            role_pos,
-            gold_total,
-            pos_event,
-            len(neg_event)
-        ])
-        print(tbl)
-        
-
+        # Log all variables using prettytable (no extra computation)
+        table = pt.PrettyTable(
+            [
+                "id",
+                "inputs",
+                "att_mask",
+                "word_mask1d",
+                "word_mask2d_shape",
+                "triu_mask2d_shape",
+                "tri_labels_shape",
+                "arg_labels_shape",
+                "role_labels_shape",
+                "gold_tuples",
+                "event_list",
+            ]
+        )
+        table.add_row(
+            [
+                instance.get("id", ins_id),
+                _inputs,
+                _att_mask,
+                _word_mask1d,
+                _word_mask2d.shape,
+                _triu_mask2d.shape,
+                _tri_labels.shape,
+                _arg_labels.shape,
+                _role_labels.shape,
+                {k: list(v) for k, v in _gold_tuples.items()},
+                (pos_event, neg_event),
+            ]
+        )
+        print(table)
 
     return inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, gold_tuples, event_list
 
