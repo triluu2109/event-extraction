@@ -106,6 +106,7 @@ class Trainer(object):
         alpha = epoch / config.epochs
         # gamma = gamma ** 2
         for i, data_batch in enumerate(data_loader):
+            self.model.train()
             data_batch = [data.cuda() for data in data_batch[:-2]] + [data_batch[-2], data_batch[-1]]
             inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, event_idx, _, role_labels_num = data_batch
             # event_idx = [i for i in range(10)]
@@ -188,6 +189,17 @@ class Trainer(object):
         table.add_row(["Label", "{:.4f}".format(np.mean(loss_list))] +
                       ["{:3.4f}".format(x) for x in [tri_f1, arg_f1, role_f1]])
         logger.info("\n{}".format(table))
+        
+        self.model.eval()
+        with torch.no_grad():
+            for i, data_batch in enumerate(data_loader):
+                data_batch = [data.cuda() for data in data_batch[:-2]] + [data_batch[-2], data_batch[-1]]
+                inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, event_idx, tuple_labels, _ = data_batch
+
+                outputs = self.model(inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels)
+                decoded = utils.decode(outputs, tuple_labels, config.tri_args)
+                logger.info("Inference result (first batch): {}".format(decoded))
+                # return decoded
         # print(np.mean(overlap))
         # print(np.mean(loss2_list))
         # print(np.mean(loss3_list))
