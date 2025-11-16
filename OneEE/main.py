@@ -199,6 +199,7 @@ class Trainer(object):
                 outputs = self.model(inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels)
                 decoded = utils.decode(outputs, tuple_labels, config.tri_args)
                 logger.info("Inference result (first batch): {}".format(decoded))
+                break
                 # return decoded
         # print(np.mean(overlap))
         # print(np.mean(loss2_list))
