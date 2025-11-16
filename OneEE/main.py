@@ -319,7 +319,7 @@ if __name__ == '__main__':
     best_f1 = 0
     best_test_f1 = 0
 
-    if args.inference == 'True':
+    if args.inference == True:
         logger.info('Inference.....')
         trainer.load(args.model_path)
         trainer.inference(test_loader)
