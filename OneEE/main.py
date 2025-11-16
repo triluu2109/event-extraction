@@ -320,22 +320,24 @@ if __name__ == '__main__':
     best_test_f1 = 0
 
     if args.inference == 'True':
+        logger.info('Inference.....')
         trainer.load(args.model_path)
         trainer.inference(test_loader)
         exit(0)
+    else:
+        logger.info('Training......')
+        for i in range(config.epochs):
+            logger.info("Epoch: {}".format(i))
+            trainer.train(i, train_loader)
+            if i >= 5:
+                f1 = trainer.eval(i, dev_loader)
+                test_f1 = trainer.eval(i, test_loader, is_test=True)
+                if f1 > best_f1:
+                    best_f1 = f1
+                    best_test_f1 = test_f1
+                    trainer.save("model.pt")
 
-    for i in range(config.epochs):
-        logger.info("Epoch: {}".format(i))
-        trainer.train(i, train_loader)
-        if i >= 5:
-            f1 = trainer.eval(i, dev_loader)
-            test_f1 = trainer.eval(i, test_loader, is_test=True)
-            if f1 > best_f1:
-                best_f1 = f1
-                best_test_f1 = test_f1
-                trainer.save("model.pt")
-
-    logger.info("Best DEV F1: {:3.4f}".format(best_f1))
-    logger.info("Best TEST F1: {:3.4f}".format(best_test_f1))
-    trainer.load("model.pt")
-    trainer.eval("Final", test_loader, True)
+        logger.info("Best DEV F1: {:3.4f}".format(best_f1))
+        logger.info("Best TEST F1: {:3.4f}".format(best_test_f1))
+        trainer.load("model.pt")
+        trainer.eval("Final", test_loader, True)
