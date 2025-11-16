@@ -225,18 +225,18 @@ class Trainer(object):
         logger.info("\n{}".format(table))
         return (ti_f1 + ai_f1 + tc_f1 + ac_f1) / 4
 
-        def inference(self, data_loader):
-                self.model.eval()
-                with torch.no_grad():
-                    for i, data_batch in enumerate(data_loader):
-                        data_batch = [data.cuda() for data in data_batch[:-2]] + [data_batch[-2], data_batch[-1]]
-                        inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, event_idx, tuple_labels, _ = data_batch
+    def inference(self, data_loader):
+            self.model.eval()
+            with torch.no_grad():
+                for i, data_batch in enumerate(data_loader):
+                    data_batch = [data.cuda() for data in data_batch[:-2]] + [data_batch[-2], data_batch[-1]]
+                    inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, event_idx, tuple_labels, _ = data_batch
 
-                        outputs = self.model(inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels)
-                        decoded = utils.decode(outputs, tuple_labels, config.tri_args)
-                        logger.info("Inference result (first batch): {}".format(decoded))
-                        return decoded
-        
+                    outputs = self.model(inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels)
+                    decoded = utils.decode(outputs, tuple_labels, config.tri_args)
+                    logger.info("Inference result (first batch): {}".format(decoded))
+                    return decoded
+    
     
     def save(self, path):
         torch.save(self.model.state_dict(), path)
