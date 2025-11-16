@@ -214,8 +214,9 @@ def process_bert(data, tokenizer, vocab):
                  + tokenizer.convert_tokens_to_ids(tokens) \
                  + [tokenizer.sep_token_id]
 
-        # print(tokens)
-        # print(_inputs)
+        print(f'\n\nID: {instance["id"]}')
+        print(f'Tokens: {tokens}')
+        print(f'Input: {_inputs}')
         
         length = len(_inputs) - 2
 
@@ -272,6 +273,30 @@ def process_bert(data, tokenizer, vocab):
         role_labels.append(_role_labels)
         gold_tuples.append(_gold_tuples)
         event_list.append((pos_event, neg_event))
+
+        # Log details for this instance using prettytable
+        tri_pos = int(_tri_labels.sum())
+        arg_pos = int(_arg_labels.sum())
+        role_pos = int(_role_labels.sum())
+        gold_total = sum(len(v) for v in _gold_tuples.values())
+        tbl = pt.PrettyTable([
+            "id", "#tokens", "att_mask_len", "tri_pos", "arg_pos", "role_pos",
+            "gold_tuples_total", "pos_event", "neg_event_count"
+        ])
+        tbl.add_row([
+            instance.get("id", ins_id),
+            len(_inputs),
+            len(_att_mask),
+            tri_pos,
+            arg_pos,
+            role_pos,
+            gold_total,
+            pos_event,
+            len(neg_event)
+        ])
+        print(tbl)
+        
+
 
     return inputs, att_mask, word_mask1d, word_mask2d, triu_mask2d, tri_labels, arg_labels, role_labels, gold_tuples, event_list
 
