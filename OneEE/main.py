@@ -271,7 +271,8 @@ if __name__ == '__main__':
     parser.add_argument('--bert_name', type=str)
     parser.add_argument('--bert_learning_rate', type=float)
 
-    parser.add_argument('--inference', type=str)
+    parser.add_argument('--inference', type=bool)
+    parser.add_argument('--model_path', type=str)
     parser.add_argument('--seed', type=int)
 
     args = parser.parse_args()
@@ -318,8 +319,8 @@ if __name__ == '__main__':
     best_f1 = 0
     best_test_f1 = 0
 
-    if args.inference == 'inference':
-        trainer.load("../model.pt")
+    if args.inference == 'True':
+        trainer.load(args.model_path)
         trainer.inference(test_loader)
         exit(0)
 
